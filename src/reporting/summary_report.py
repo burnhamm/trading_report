@@ -9,6 +9,9 @@ from model.currency import CurrencyPosition
 def generate_summary_report(actions: list[Action], assets: dict[str, dict[str, Asset]], positions: list[Position], currencies: list[CurrencyPosition], fx_rate_provider, output_path: str):
     ctx = SummaryReport(fx_rate_provider)
 
+    min_date = actions[0].date.date()
+    max_date = actions[-1].date.date()
+
     for action in actions:
         action.apply(ctx)
 
@@ -24,6 +27,7 @@ def generate_summary_report(actions: list[Action], assets: dict[str, dict[str, A
         ctx.handle_currency(currency)
 
     with open(output_path + "/summary.txt", "w") as file:
+        print_period(file, min_date, max_date)
         print_cash_flow(ctx, file)
         file.write("\n\n")
         print_realized(ctx, file)
@@ -115,6 +119,10 @@ class SummaryReport:
         if currency.closed:
             self.currency_revenue += currency.amount * currency.sell_price
             self.currency_expenses += currency.amount * currency.buy_price
+
+
+def print_period(file, min_date, max_date):
+    file.write(f"=== PERIOD: {min_date} - {max_date} ===\n\n")
 
 
 def print_cash_flow(report: SummaryReport, file):

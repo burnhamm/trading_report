@@ -36,7 +36,7 @@ class AssetAction(Action):
     quantity: Decimal
     price: Decimal
 
-    result: Decimal
+    result: Decimal # in base currency
 
 
 @dataclass
@@ -63,7 +63,7 @@ class ExchangeAction(Action):
     fee: Decimal
     fee_currency: str # TODO: ensure it is used correclty in all reports and builders
 
-    result: Decimal
+    result: Decimal # in base currency
 
 
 @dataclass
@@ -87,7 +87,7 @@ class DividendAction(Action):
     reversed_assignment: bool
     tax: Decimal
     tax_currency: str
-    result: Decimal
+    result: Decimal # in base currency
 
     def apply(self, ctx):
         ctx.handle_dividend(self)
@@ -112,7 +112,7 @@ class InterestOnCashAction(Action):
 
 @dataclass
 class SpendingAction(Action):
-    result: Decimal
+    result: Decimal # in base currency
 
     def apply(self, ctx):
         ctx.handle_spending(self)
@@ -120,7 +120,7 @@ class SpendingAction(Action):
 
 @dataclass
 class CashbackAction(Action):
-    result: Decimal
+    result: Decimal # in base currency
 
     def apply(self, ctx):
         ctx.handle_cashback(self)

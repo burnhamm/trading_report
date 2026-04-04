@@ -43,7 +43,7 @@ class PositionBuilder:
     def handle_dividend(self, action: Action):
         ex_rate = self.fx_rate_provider.get_rate(action.tax_currency, action.date)
         tax = action.tax * ex_rate
-        self._assign_income(action.symbol, action.result, action.tax, action.no_of_shares, action.reversed_assignment)
+        self._assign_income(action.symbol, action.result, tax, action.no_of_shares, action.reversed_assignment)
 
     def handle_lending_interest(self, action: Action):
         pass # TODO: consider spreading it to all open positions

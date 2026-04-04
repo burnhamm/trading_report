@@ -5,7 +5,7 @@ from decimal import Decimal
 from decimal_utils import normalize_decimal as nd
 from model.currency import CurrencyPosition
 
-def generate_fx_report(positions: list[CurrencyPosition], output_path: str):
+def generate_fx_view(positions: list[CurrencyPosition], output_path: str):
     data = []
     for p in positions:
         total_buy = p.amount * p.buy_price

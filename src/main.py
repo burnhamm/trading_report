@@ -10,9 +10,9 @@ from processing.asset_builder import build_assets
 from processing.position_builder import build_positions
 from processing.fx_positions_builder import build_fx_positions
 from exchange.broker_fx_rates_builder import build_broker_fx_rates
-from reporting.asset_report import generate_asset_report
-from reporting.positions_report import generate_positions_report
-from reporting.fx_report import generate_fx_report
+from views.asset_view import generate_asset_view
+from views.positions_view import generate_positions_view
+from views.fx_view import generate_fx_view
 from reporting.summary_report import generate_summary_report
 
 from datetime import datetime as Datetime
@@ -43,10 +43,17 @@ def main():
     if not os.path.exists(args.output_path):
         os.makedirs(args.output_path)
 
-    generate_asset_report(assets, fx_rate_provider, args.output_path)
-    generate_positions_report(positions, fx_rate_provider, args.output_path)
-    generate_fx_report(fx_positions, args.output_path)
-    generate_summary_report(actions, assets, positions, fx_positions, fx_rate_provider, args.output_path)
+    views_path = os.path.join(args.output_path, "views")
+    if not os.path.exists(views_path):
+        os.makedirs(views_path)
+    generate_asset_view(assets, views_path)
+    generate_positions_view(positions, fx_rate_provider, views_path)
+    generate_fx_view(fx_positions, views_path)
+
+    reports_path = os.path.join(args.output_path, "reports")
+    if not os.path.exists(reports_path):
+        os.makedirs(reports_path)
+    generate_summary_report(actions, assets, positions, fx_positions, fx_rate_provider, reports_path)
 
 
 if __name__ == "__main__":

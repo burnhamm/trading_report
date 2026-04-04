@@ -5,7 +5,7 @@ from decimal import Decimal
 from decimal_utils import normalize_decimal as nd
 from model.position import Position
 
-def generate_positions_report(positions: list[Position], fx_rate_provider, output_path: str):
+def generate_positions_view(positions: list[Position], fx_rate_provider, output_path: str):
     data = []
     for p in positions:
         ex_rate = fx_rate_provider.get_rate(p.currency, p.close_date if p.closed else p.open_date)
@@ -14,8 +14,6 @@ def generate_positions_report(positions: list[Position], fx_rate_provider, outpu
             total_sell = p.quantity * p.sell_price * ex_rate
             total_profit = total_sell - total_buy + p.dividends - p.taxes
             length_days = (p.close_date - p.open_date).days
-            if length_days == 0 and p.dividends == Decimal("0") and p.taxes == Decimal("0"):
-                continue
             yearly_profit = total_profit / length_days * 365 if length_days > 0 else 0
             yearly_profit_percent = yearly_profit / total_buy if total_buy > Decimal("0") else 0
             data.append(["CLOSED", p.symbol, nd(p.quantity), p.currency,  p.open_date.date(), nd(p.buy_price), nd(total_buy), p.close_date.date(), nd(p.sell_price), nd(total_sell), nd(p.dividends), nd(p.taxes), nd(total_profit), length_days, f"{nd(yearly_profit_percent * 100)}%"])

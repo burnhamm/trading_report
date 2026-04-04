@@ -5,7 +5,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from decimal_utils import normalize_decimal as nd
 from model.asset import Asset
 
-def generate_asset_report(assets: dict[str, dict[str, Asset]], fx_rate_provider, output_path: str):
+def generate_asset_view(assets: dict[str, dict[str, Asset]], output_path: str):
     data = []
     for cur_assets in assets.values():
         for asset in cur_assets.values():
@@ -15,7 +15,7 @@ def generate_asset_report(assets: dict[str, dict[str, Asset]], fx_rate_provider,
             data.append([asset.symbol, asset.currency, nd(asset.quantity), nd(asset.dividends), nd(asset.taxes)]) # TODO: add mean profit 
 
     data.sort(key=lambda r: r[0])
-    data.insert(0, ["Ticker", "Currency", "Quantity", "Total dividends", "Total taxes"])
+    data.insert(0, ["Ticker", "Currency", "Quantity", "Total dividends", "Total taxes"]) # TODO: come up with how to calculate yearly % profit per asset
 
     with open(output_path + "/assets.csv", "w", newline='') as file:
         writer = csv.writer(file)

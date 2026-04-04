@@ -12,10 +12,10 @@ def generate_asset_report(assets: dict[str, dict[str, Asset]], fx_rate_provider,
             if asset.is_currency:
                 # continue
                 pass
-            data.append([asset.symbol, asset.currency, nd(asset.quantity), nd(asset.dividents), nd(asset.taxes)]) # TODO: add mean profit 
+            data.append([asset.symbol, asset.currency, nd(asset.quantity), nd(asset.dividends), nd(asset.taxes)]) # TODO: add mean profit 
 
     data.sort(key=lambda r: r[0])
-    data.insert(0, ["Ticker", "Currency", "Quantity", "Total dividents", "Total taxes"])
+    data.insert(0, ["Ticker", "Currency", "Quantity", "Total dividends", "Total taxes"])
 
     with open(output_path + "/assets.csv", "w", newline='') as file:
         writer = csv.writer(file)

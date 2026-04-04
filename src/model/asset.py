@@ -8,7 +8,7 @@ class Asset:
     currency: str
     quantity: Decimal = Decimal("0")
     closed_quantity: Decimal = Decimal("0")
-    dividents: Decimal = Decimal("0") # in base currency
+    dividends: Decimal = Decimal("0") # in base currency
     taxes: Decimal = Decimal("0") # in base currency
     fees: Decimal = Decimal("0")
     is_currency: bool = False

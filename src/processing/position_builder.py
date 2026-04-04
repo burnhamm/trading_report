@@ -71,7 +71,7 @@ class PositionBuilder:
             open_date=date,
             buy_price=price,
             taxes=tax,
-            dividents=Decimal("0"),
+            dividends=Decimal("0"),
         ))
 
     def _close(self, symbol: str, currency: str, quantity: Decimal, date: Datetime, price: Decimal, tax: Decimal):
@@ -105,11 +105,11 @@ class PositionBuilder:
             open_date=pos.open_date,
             buy_price=pos.buy_price,
             taxes=pos.taxes * new_quantity / pos.quantity,
-            dividents=pos.dividents * new_quantity / pos.quantity,
+            dividends=pos.dividends * new_quantity / pos.quantity,
         )
         pos.quantity -= new_quantity
         pos.taxes -= new_pos.taxes
-        pos.dividents -= new_pos.dividents
+        pos.dividends -= new_pos.dividends
         self.positions.insert(index + 1, new_pos)
 
     def _assign_income(self, symbol: str, amount: Decimal, tax: Decimal, no_of_shares: Decimal, reversed_assignment: bool):
@@ -121,7 +121,7 @@ class PositionBuilder:
         for pos in positions:
             if pos.symbol == symbol and not pos.closed:
                 pos_amount = min(amount * pos.quantity / no_of_shares, amount_left)
-                pos.dividents += pos_amount
+                pos.dividends += pos_amount
                 pos.taxes += tax * pos_amount / amount
                 amount_left -= pos_amount
                 if amount_left == 0:
@@ -131,11 +131,11 @@ class PositionBuilder:
             for pos in reversed(self.positions):
                 if pos.symbol == symbol and pos.closed:
                     pos_amount = min(amount * pos.quantity / no_of_shares, amount_left)
-                    pos.dividents += pos_amount
+                    pos.dividends += pos_amount
                     pos.taxes += tax * pos_amount / amount
                     amount_left -= pos_amount
                     if amount_left == 0:
                         break
 
         if abs(amount_left) > Decimal('0.000001'): # TODO: compatibilty backward, in clean version pos_amount should be rouneded and this shouldn't happen
-            raise ValueError(f"wrong left over from dividents for {symbol}: {amount_left}; total: {amount}")
+            raise ValueError(f"wrong left over from dividends for {symbol}: {amount_left}; total: {amount}")

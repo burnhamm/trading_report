@@ -13,7 +13,7 @@ class Position:
     buy_price: Decimal
 
     taxes: Decimal = Decimal("0")
-    dividents: Decimal = Decimal("0")
+    dividends: Decimal = Decimal("0")
     
     closed: bool = False
     close_date: Datetime | None = None

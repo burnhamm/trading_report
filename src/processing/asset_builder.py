@@ -72,7 +72,7 @@ class AssetBuilder:
 
     def handle_interest_on_cash(self, action: Action):
         asset = self._get_asset(action.currency, action.currency, True)
-        asset.dividents += action.amount
+        asset.dividends += action.amount
         asset.quantity += action.amount
 
     # TODO: same as withdrawal?
@@ -96,7 +96,7 @@ class AssetBuilder:
                 symbol=symbol,
                 currency=currency,
                 quantity=Decimal("0"),
-                dividents=Decimal("0"),
+                dividends=Decimal("0"),
                 taxes=Decimal("0"),
                 fees=Decimal("0"),
                 is_currency=is_currency,
@@ -111,5 +111,5 @@ class AssetBuilder:
             total_quantity = sum(a.closed_quantity for a in self.assets[symbol].values())
         for asset in self.assets[symbol].values():
             share = (asset.quantity if not assign_to_closed else asset.closed_quantity) / total_quantity
-            asset.dividents += amount * share
+            asset.dividends += amount * share
             asset.taxes += tax * share

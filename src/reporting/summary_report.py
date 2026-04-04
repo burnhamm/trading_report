@@ -50,7 +50,7 @@ class SummaryReport:
 
         self.closed_position_revenue = Decimal("0")
         self.closed_position_expenses = Decimal("0")
-        self.dividents = Decimal("0")
+        self.dividends = Decimal("0")
         self.interest_on_lending = Decimal("0")
         self.taxes = Decimal("0")
 
@@ -82,7 +82,7 @@ class SummaryReport:
         self.exchange_fees += action.fee
 
     def handle_dividend(self, action: Action):
-        self.dividents += action.result
+        self.dividends += action.result
         self.taxes += action.tax
 
     def handle_lending_interest(self, action: Action):
@@ -159,12 +159,12 @@ def print_realized(report: SummaryReport, file):
     file.write("-" * 62 + "\n")
 
     file.write(row("closed positions", report.closed_position_expenses, report.closed_position_revenue))
-    file.write(row("dividends", Decimal("0"), report.dividents))
+    file.write(row("dividends", Decimal("0"), report.dividends))
     file.write(row("interest", Decimal("0"), report.interest_on_lending))
     file.write(row("taxes", report.taxes, Decimal("0")))
 
     total_exp = report.closed_position_expenses + report.taxes
-    total_rev = report.closed_position_revenue + report.dividents + report.interest_on_lending
+    total_rev = report.closed_position_revenue + report.dividends + report.interest_on_lending
     file.write("-" * 62 + "\n")
     file.write(row("TOTAL (net)", total_exp, total_rev))
 

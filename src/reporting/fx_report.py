@@ -22,8 +22,8 @@ def generate_fx_report(positions: list[CurrencyPosition], output_path: str):
             data.append([p.name, '', nd(p.amount), p.open_date.date(), nd(p.buy_price), nd(total_buy), nd(p.fees), nd(p.interest), '', '', '']) # add total buy here
 
     data.sort(key=lambda r: r[0])
-    # data.insert(0, ["Name", "Closed", "Amount", "Buy date", "Buy price", "Total fees", "Total dividents", "Sell date", "Sell price"]) # change to Total interest
-    data.insert(0, ["Name", "Closed", "Amount", "Buy date", "Buy price", "Total buy", "Total fees", "Total dividents", "Sell date", "Sell price", "Total sell"]) # change to Total interest
+    # data.insert(0, ["Name", "Closed", "Amount", "Buy date", "Buy price", "Total fees", "Total dividends", "Sell date", "Sell price"]) # change to Total interest
+    data.insert(0, ["Name", "Closed", "Amount", "Buy date", "Buy price", "Total buy", "Total fees", "Total dividends", "Sell date", "Sell price", "Total sell"]) # change to Total interest
 
     with open(output_path + "/fx.csv", "w", newline='') as file:
         writer = csv.writer(file)

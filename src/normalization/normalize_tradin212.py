@@ -29,8 +29,8 @@ def _map_row(row: dict, base_currency: str, merging_actions: dict) -> list[Actio
         case "Dividend (Ordinary)" | "Dividend (Dividend)" | "Dividend (Tax exempted)":
             return _map_dividend(row, False)
         case "Dividend (Dividend manufactured payment)":
-            # it seems to be supplementary divident for the missing part of the previous dividend.
-            # To spread the divident amount positions correctly it is assigned to positions starting from the last backwards
+            # it seems to be supplementary dividend for the missing part of the previous dividend.
+            # To spread the dividend amount positions correctly it is assigned to positions starting from the last backwards
             return _map_dividend(row, True)
         case "Lending interest":
             return _map_lending_interest(row)

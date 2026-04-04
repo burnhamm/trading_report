@@ -8,29 +8,24 @@ from model.position import Position
 def generate_positions_report(positions: list[Position], fx_rate_provider, output_path: str):
     data = []
     for p in positions:
-        if p.is_currency:
-            continue
-
         ex_rate = fx_rate_provider.get_rate(p.currency, p.close_date if p.closed else p.open_date)
         total_buy = p.quantity * p.buy_price * ex_rate
         if p.closed:
             total_sell = p.quantity * p.sell_price * ex_rate
-            total_profit = total_sell - total_buy + p.dividents - p.fees
+            total_profit = total_sell - total_buy + p.dividents - p.taxes
             length_days = (p.close_date - p.open_date).days
+            if length_days == 0 and p.dividents == Decimal("0") and p.taxes == Decimal("0"):
+                continue
             yearly_profit = total_profit / length_days * 365 if length_days > 0 else 0
             yearly_profit_percent = yearly_profit / total_buy if total_buy > Decimal("0") else 0
-            #data.append([p.symbol, 'CLOSED', p.currency, nd(p.quantity), p.open_date.date(), nd(p.buy_price), nd(p.fees), nd(p.dividents), p.close_date.date(), nd(p.sell_price)])
-            data.append([p.symbol, 'CLOSED', p.currency, nd(p.quantity), p.open_date.date(), nd(p.buy_price), nd(total_buy), nd(p.fees), nd(p.dividents), p.close_date.date(), nd(p.sell_price), nd(total_sell)])
+            data.append(["CLOSED", p.symbol, nd(p.quantity), p.currency,  p.open_date.date(), nd(p.buy_price), nd(total_buy), p.close_date.date(), nd(p.sell_price), nd(total_sell), nd(p.dividents), nd(p.taxes), nd(total_profit), length_days, f"{nd(yearly_profit_percent * 100)}%"])
         else:
-            # data.append([p.symbol, '', p.currency, nd(p.quantity), p.open_date.date(), nd(p.buy_price), nd(p.fees), nd(p.dividents), '', '']) # add total buy here
-            data.append([p.symbol, '', p.currency, nd(p.quantity), p.open_date.date(), nd(p.buy_price), nd(total_buy), nd(p.fees), nd(p.dividents), '', '', ''])
+            data.append(["", p.symbol, nd(p.quantity), p.currency,  p.open_date.date(), nd(p.buy_price), nd(total_buy), "", "", "", nd(p.dividents), nd(p.taxes), "", "", ""])
 
-    # sort by closed first, then by symbol, then by currency, then by quantity
-    # data.sort(key=lambda r: (r[0]))
-    data.sort(key=lambda r: (r[0], r[2], r[4]))
-    data.sort(key=lambda r: r[1], reverse=True)
-    # data.insert(0, ["Ticker", "Closed", "Currency", "Amount", "Buy date", "Buy price", "Total fees", "Total dividents", "Sell date", "Sell price"])
-    data.insert(0, ["Ticker", "Closed", "Currency", "Amount", "Buy date", "Buy price", "Total buy", "Total fees", "Total dividents", "Sell date", "Sell price", "Total sell"])
+    data.sort(key=lambda r: (r[1], r[3], r[4]))
+    data.sort(key=lambda r: r[0], reverse=True)
+    data.insert(0, 
+        ["Closed", "Ticker", "Amount", "Currency", "Buy date", "Buy price", "Total buy", "Sell date", "Sell price", "Total sell", "Dividends", "Taxes", "Net profit", "Position length (days)", "Yearly profit %"])
 
     with open(output_path + "/positions.csv", "w", newline='') as file:
         writer = csv.writer(file)

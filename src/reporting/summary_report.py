@@ -20,8 +20,7 @@ def generate_summary_report(actions: list[Action], assets: dict[str, dict[str, A
             ctx.handle_asset(asset)
 
     for position in positions:
-        if not position.is_currency:
-            ctx.handle_position(position)
+        ctx.handle_position(position)
 
     for currency in currencies:
         ctx.handle_currency(currency)

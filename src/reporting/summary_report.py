@@ -70,7 +70,8 @@ class SummaryReport:
         self.withdrawals += action.amount
 
     def handle_buy(self, action: Action):
-        self.taxes += action.tax
+        ex_rate = self.fx_rate_provider.get_rate(action.tax_currency, action.date)
+        self.taxes += action.tax * ex_rate
 
     def handle_sell(self, action: Action):
         pass
@@ -83,7 +84,8 @@ class SummaryReport:
 
     def handle_dividend(self, action: Action):
         self.dividends += action.result
-        self.taxes += action.tax
+        ex_rate = self.fx_rate_provider.get_rate(action.tax_currency, action.date)
+        self.taxes += action.tax * ex_rate
 
     def handle_lending_interest(self, action: Action):
         self.interest_on_lending += action.result

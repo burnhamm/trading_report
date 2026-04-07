@@ -9,7 +9,7 @@ from pathlib import Path
 class FieldRule(Enum):
     REQUIRED = "required"
     FORBIDDEN = "forbidden"
-    OPTIONAL = "optional" # one word synonims: 
+    OPTIONAL = "optional"
     IGNORED = "ignored"    
 
 

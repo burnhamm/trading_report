@@ -6,11 +6,13 @@ from exchange.forex_fx_rates_provider import ForexRatesProvider
 from exchange.npb_fx_rates_provider import NbpRatesProvider
 from loader import load_csv
 from normalization import normalize_actions
+from processing.cash_flow_builder import build_cash_flow
 from processing.asset_builder import build_assets
 from processing.position_builder import build_positions
 from processing.fx_positions_builder import build_fx_positions
 from processing.incomes_n_costs_builder import build_income_cost
 from exchange.broker_fx_rates_builder import build_broker_fx_rates
+from views.cash_flow_view import generate_cash_flow_view
 from views.asset_view import generate_asset_view
 from views.positions_view import generate_positions_view
 from views.fx_view import generate_fx_view
@@ -37,6 +39,7 @@ def main():
     nbp_fx_provider = NbpRatesProvider(base_currency, "nbp") # TODO: implementation may be parameterized
     fx_rate_provider = BrokerFxRatesProvider(ex_rates, base_currency, backup_provider=nbp_fx_provider) # TODO: implementation may be parameterized
     
+    cash_flow = build_cash_flow(actions, base_currency)
     assets = build_assets(actions, fx_rate_provider)        
     positions = build_positions(actions, fx_rate_provider) # FIFO trades
     fx_positions = build_fx_positions(actions, fx_rate_provider) # FX trades
@@ -49,6 +52,7 @@ def main():
     views_path = os.path.join(args.output_path, "views")
     if not os.path.exists(views_path):
         os.makedirs(views_path)
+    generate_cash_flow_view(cash_flow, views_path)
     generate_asset_view(assets, views_path)
     generate_positions_view(positions, fx_rate_provider, views_path)
     generate_fx_view(fx_positions, views_path)

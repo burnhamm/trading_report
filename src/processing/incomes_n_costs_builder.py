@@ -24,7 +24,7 @@ class IncomeCostBuilder:
             self.incomes_n_costs.append(Incost(
                 date=action.date,
                 type=IncostType.DEPOSIT_FEE,
-                amount=-action.fee,
+                amount=action.fee,
                 currency=self.base_currency
             ))
 
@@ -36,7 +36,7 @@ class IncomeCostBuilder:
             self.incomes_n_costs.append(Incost(
                 date=action.date,
                 type=IncostType.TAX,
-                amount=-action.tax,
+                amount=action.tax,
                 currency=action.tax_currency,
                 symbol=action.symbol
             ))
@@ -49,7 +49,7 @@ class IncomeCostBuilder:
             self.incomes_n_costs.append(Incost(
                 date=action.date,
                 type=IncostType.CONVERSION_FEE,
-                amount=-action.fee,
+                amount=action.fee,
                 currency=action.fee_currency,
             ))
 
@@ -58,7 +58,7 @@ class IncomeCostBuilder:
             self.incomes_n_costs.append(Incost(
                 date=action.date,
                 type=IncostType.CONVERSION_FEE,
-                amount=-action.fee,
+                amount=action.fee,
                 currency=action.fee_currency,
             ))
 
@@ -74,7 +74,7 @@ class IncomeCostBuilder:
             self.incomes_n_costs.append(Incost(
                 date=action.date,
                 type=IncostType.TAX,
-                amount=-action.tax,
+                amount=action.tax,
                 currency=action.tax_currency,
                 symbol=action.symbol
             ))

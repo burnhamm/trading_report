@@ -20,6 +20,9 @@ class NbpRatesProvider:
             if rate is None: # must by holiday, try previous day
                 date = date - timedelta(days=1)
         return rate
+    
+    def get_prev_day_rate(self, currency: str, date: Datetime) -> Decimal:
+        return self.get_rate(currency, date - timedelta(days=1))
 
     def _get_rate_for_date(self, currency: str, date: Date) -> Decimal:
         if currency not in self.rates or date.year not in self.rates[currency]:

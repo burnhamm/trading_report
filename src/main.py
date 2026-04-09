@@ -18,6 +18,7 @@ from views.positions_view import generate_positions_view
 from views.fx_view import generate_fx_view
 from views.income_cost_view import generate_income_cost_view
 from reporting.summary_report import generate_summary_report
+from reporting.pit38_report import generate_pit38_report
 
 from datetime import datetime as Datetime
 
@@ -62,6 +63,7 @@ def main():
     if not os.path.exists(reports_path):
         os.makedirs(reports_path)
     generate_summary_report(actions, assets, positions, fx_positions, fx_rate_provider, reports_path)
+    generate_pit38_report(positions, incosts, nbp_fx_provider, reports_path)
 
 
 if __name__ == "__main__":

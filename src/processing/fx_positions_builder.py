@@ -5,6 +5,13 @@ from model.action import Action
 from model.currency import CurrencyPosition
 
 
+# Currency view is not working properly right now
+#+when asset is bought and then sold, certain amount of currency gets "created" or "destroyed"
+#+it's not accounted for right now
+#+for this to work, I should count shares and "create" or "destroy" currency positions when shares are sold
+#+for this to be possible, I should merge back together buy and exchange_buy
+
+
 def build_fx_positions(actions: list[Action], fx_rate_provider) -> list[CurrencyPosition]:
     ctx = CurrencyBuilder(fx_rate_provider)
 

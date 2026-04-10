@@ -3,7 +3,7 @@ from decimal import Decimal
 from model.asset import Asset
 from model.action import Action
 from model.position import Position
-from model.currency import CurrencyPosition
+from model.currency_position import CurrencyPosition
 
 
 def generate_summary_report(actions: list[Action], assets: dict[str, dict[str, Asset]], positions: list[Position], currencies: list[CurrencyPosition], fx_rate_provider, output_path: str):

@@ -2,7 +2,7 @@ from datetime import date as Date
 from decimal import Decimal, ROUND_HALF_UP
 
 from model.action import Action
-from model.currency import CurrencyPosition
+from model.currency_position import CurrencyPosition
 
 
 # Currency view is not working properly right now

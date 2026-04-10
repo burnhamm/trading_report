@@ -3,7 +3,7 @@ import csv
 from decimal import Decimal
 
 from decimal_utils import normalize_decimal as nd
-from model.currency import CurrencyPosition
+from model.currency_position import CurrencyPosition
 
 def generate_fx_view(positions: list[CurrencyPosition], output_path: str):
     data = []

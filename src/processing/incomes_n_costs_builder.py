@@ -2,7 +2,7 @@ from datetime import date as Date
 from decimal import Decimal, ROUND_HALF_UP
 
 from model.action import Action
-from model.currency import CurrencyPosition
+from model.currency_position import CurrencyPosition
 from model.incomes_n_costs import Incost, IncostType
 
 def build_income_cost(actions: list[Action], base_currency: str) -> list[Incost]:

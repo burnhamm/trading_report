@@ -1,12 +1,13 @@
 from decimal import Decimal
 
-from model.asset import Asset
 from model.action import Action
-from model.position import Position
+from model.asset import Asset
+from model.currency import Currency
 from model.currency_position import CurrencyPosition
+from model.position import Position
 
 
-def generate_summary_report(actions: list[Action], assets: dict[str, dict[str, Asset]], positions: list[Position], currencies: list[CurrencyPosition], fx_rate_provider, output_path: str):
+def generate_summary_report(actions: list[Action], currencies: dict[str, Currency], positions: list[Position], cur_positions: list[CurrencyPosition], fx_rate_provider, output_path: str):
     ctx = SummaryReport(fx_rate_provider)
 
     min_date = actions[0].date.date()
@@ -15,15 +16,14 @@ def generate_summary_report(actions: list[Action], assets: dict[str, dict[str, A
     for action in actions:
         action.apply(ctx)
 
-    for cur_asset in assets.values():
-        for asset in cur_asset.values():
-            ctx.handle_asset(asset)
-
     for position in positions:
         ctx.handle_position(position)
 
-    for currency in currencies:
+    for currency in currencies.values():
         ctx.handle_currency(currency)
+
+    for cur_pos in cur_positions:
+        ctx.handle_currency_position(cur_pos)
 
     with open(output_path + "/summary.txt", "w") as file:
         print_period(file, min_date, max_date)
@@ -103,10 +103,6 @@ class SummaryReport:
     def handle_split(self, action: Action):
         pass
 
-    def handle_asset(self, asset: Asset):
-        if asset.is_currency:
-            self.cash_balance[asset.currency] = asset.quantity
-
     def handle_position(self, position: Position):
         ex_rate = self.fx_rate_provider.get_rate(position.currency, position.close_date if position.closed else position.open_date)
         if not position.closed:
@@ -116,10 +112,13 @@ class SummaryReport:
             self.closed_position_revenue += position.quantity * position.sell_price * ex_rate
             self.closed_position_expenses += position.quantity * position.buy_price * ex_rate
 
-    def handle_currency(self, currency: CurrencyPosition):
-        if currency.closed:
-            self.currency_revenue += currency.amount * currency.sell_price
-            self.currency_expenses += currency.amount * currency.buy_price
+    def handle_currency(self, currency: Currency):
+        self.cash_balance[currency.code] = currency.amount
+
+    def handle_currency_position(self, cur_pos: CurrencyPosition):
+        if cur_pos.closed:
+            self.currency_revenue += cur_pos.amount * cur_pos.sell_price
+            self.currency_expenses += cur_pos.amount * cur_pos.buy_price
 
 
 def print_period(file, min_date, max_date):

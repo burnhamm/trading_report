@@ -9,9 +9,6 @@ def generate_asset_view(assets: dict[str, dict[str, Asset]], output_path: str):
     data = []
     for cur_assets in assets.values():
         for asset in cur_assets.values():
-            if asset.is_currency:
-                # continue
-                pass
             data.append([asset.symbol, asset.currency, nd(asset.quantity), nd(asset.dividends), nd(asset.taxes)]) # TODO: add mean profit 
 
     data.sort(key=lambda r: r[0])

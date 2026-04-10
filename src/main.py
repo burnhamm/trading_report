@@ -8,6 +8,7 @@ from loader import load_csv
 from normalization import normalize_actions
 from processing.cash_flow_builder import build_cash_flow
 from processing.asset_builder import build_assets
+from processing.currency_builder import build_currencies
 from processing.position_builder import build_positions
 from processing.fx_positions_builder import build_fx_positions
 from processing.incomes_n_costs_builder import build_income_cost
@@ -41,7 +42,8 @@ def main():
     fx_rate_provider = BrokerFxRatesProvider(ex_rates, base_currency, backup_provider=nbp_fx_provider) # TODO: implementation may be parameterized
     
     cash_flow = build_cash_flow(actions, base_currency)
-    assets = build_assets(actions, fx_rate_provider)        
+    assets = build_assets(actions, fx_rate_provider)
+    currencies = build_currencies(actions, fx_rate_provider)
     positions = build_positions(actions, fx_rate_provider) # FIFO trades
     fx_positions = build_fx_positions(actions, fx_rate_provider) # FX trades
     incosts = build_income_cost(actions, base_currency)
@@ -62,7 +64,7 @@ def main():
     reports_path = os.path.join(args.output_path, "reports")
     if not os.path.exists(reports_path):
         os.makedirs(reports_path)
-    generate_summary_report(actions, assets, positions, fx_positions, fx_rate_provider, reports_path)
+    generate_summary_report(actions, currencies, positions, fx_positions, fx_rate_provider, reports_path)
     generate_pit38_report(positions, incosts, nbp_fx_provider, reports_path)
 
 

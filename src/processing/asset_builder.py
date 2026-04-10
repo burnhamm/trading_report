@@ -17,78 +17,54 @@ class AssetBuilder:
     def __init__(self, fx_rate_provider):
         self.fx_rate_provider = fx_rate_provider
         self.base_currency = fx_rate_provider.base_currency
-        self.assets: dict[str, Asset] = {}
+        self.assets: dict[str, dict[str, Asset]] = {}
 
     def handle_deposit(self, action: Action):
-        asset = self._get_asset(self.base_currency, self.base_currency, True)
-        asset.quantity += action.amount
-        asset.fees += action.fee
+        pass
 
     def handle_withdrawal(self, action: Action):
-        asset = self._get_asset(self.base_currency, self.base_currency, True)
-        asset.quantity -= action.amount
+        pass
 
     def handle_buy(self, action: Action):
-        cur_asset = self._get_asset(action.currency, action.currency, True)
         asset = self._get_asset(action.symbol, action.currency)
-        cur_asset.quantity -= action.result
         asset.quantity += action.quantity
         ex_rate = self.fx_rate_provider.get_rate(action.tax_currency, action.date) # TODO: amount + currency = separate type
         asset.taxes += action.tax * ex_rate
 
     def handle_sell(self, action: Action):
         asset = self._get_asset(action.symbol, action.currency)
-        cur_asset = self._get_asset(action.currency, action.currency, True)
         asset.quantity -= action.quantity
         asset.closed_quantity += action.quantity
-        cur_asset.quantity += action.result
 
     def handle_exchange_buy(self, action: Action):
-        src_cur = self._get_asset(self.base_currency, self.base_currency, True)
-        dst_cur = self._get_asset(action.currency, action.currency, True)
-        src_cur.quantity -= action.result
-        dst_cur.quantity += action.quantity
-        ex_rate = self.fx_rate_provider.get_rate(action.fee_currency, action.date)
-        dst_cur.fees += action.fee * ex_rate
+        pass
 
     def handle_exchange_sell(self, action: Action):
-        src_cur = self._get_asset(self.base_currency, self.base_currency, True)
-        dst_cur = self._get_asset(action.currency, action.currency, True)
-        src_cur.quantity += action.result
-        dst_cur.quantity -= action.quantity
-        ex_rate = self.fx_rate_provider.get_rate(action.fee_currency, action.date)
-        src_cur.fees += action.fee * ex_rate
+        pass
 
     def handle_dividend(self, action: Action):
-        cur_asset = self._get_asset(self.base_currency, self.base_currency, True)
-        cur_asset.quantity += action.result
         ex_rate = self.fx_rate_provider.get_rate(action.currency, action.date)
         tax = action.tax * ex_rate
         self._assign_dividend(action.symbol, action.result, tax)
 
     def handle_lending_interest(self, action: Action):
-        asset = self._get_asset(self.base_currency, self.base_currency, True)
-        asset.quantity += action.result
+        # TODO: assign evenly to all assets?
+        pass
 
     def handle_interest_on_cash(self, action: Action):
-        asset = self._get_asset(action.currency, action.currency, True)
-        asset.dividends += action.amount
-        asset.quantity += action.amount
+        pass
 
-    # TODO: same as withdrawal?
     def handle_spending(self, action: Action):
-        asset = self._get_asset(self.base_currency, self.base_currency, True)
-        asset.quantity -= action.result
+        pass
 
     def handle_cashback(self, action: Action):
-        asset = self._get_asset(self.base_currency, self.base_currency, True)
-        asset.quantity += action.result
+        pass
 
     def handle_split(self, action: Action):
         for asset in self.assets[action.symbol].values():
             asset.quantity *= action.ratio
 
-    def _get_asset(self, symbol: str, currency: str, is_currency=False):
+    def _get_asset(self, symbol: str, currency: str):
         if symbol not in self.assets:
             self.assets[symbol] = {}
         if currency not in self.assets[symbol]:
@@ -96,10 +72,9 @@ class AssetBuilder:
                 symbol=symbol,
                 currency=currency,
                 quantity=Decimal("0"),
+                closed_quantity=Decimal("0"),
                 dividends=Decimal("0"),
                 taxes=Decimal("0"),
-                fees=Decimal("0"),
-                is_currency=is_currency,
             )
         return self.assets[symbol][currency]
 

@@ -1,6 +1,7 @@
 import csv
 
 from decimal import Decimal
+from pyxirr import xirr
 
 from decimal_utils import normalize_decimal as nd
 from model.position import Position
@@ -18,15 +19,31 @@ def generate_positions_view(positions: list[Position], fx_rate_provider, output_
             length_days = (p.close_date - p.open_date).days
             yearly_profit = total_profit / length_days * 365 if length_days > 0 else 0
             yearly_profit_percent = yearly_profit / total_buy if total_buy > Decimal("0") else 0
-            data.append(["CLOSED", p.symbol, nd(p.quantity), p.currency,  p.open_date.date(), nd(p.buy_price), nd(total_buy), p.close_date.date(), nd(p.sell_price), nd(total_sell), nd(dividends), nd(taxes), nd(total_profit), length_days, f"{nd(yearly_profit_percent * 100)}%"])
+            xirr_result = calculate_xirr(p, ex_rate)
+            data.append(["CLOSED", p.symbol, nd(p.quantity), p.currency,  p.open_date.date(), nd(p.buy_price), nd(total_buy), p.close_date.date(), nd(p.sell_price), nd(total_sell), nd(dividends), nd(taxes), nd(total_profit), length_days, f"{nd(yearly_profit_percent * 100)}%", nd(xirr_result)])
         else:
-            data.append(["", p.symbol, nd(p.quantity), p.currency,  p.open_date.date(), nd(p.buy_price), nd(total_buy), "", "", "", nd(dividends), nd(taxes), "", "", ""])
+            data.append(["", p.symbol, nd(p.quantity), p.currency,  p.open_date.date(), nd(p.buy_price), nd(total_buy), "", "", "", nd(dividends), nd(taxes), "", "", "", ""])
 
     data.sort(key=lambda r: (r[1], r[3], r[4]))
     data.sort(key=lambda r: r[0], reverse=True)
     data.insert(0, 
-        ["Closed", "Ticker", "Amount", "Currency", "Buy date", "Buy price", "Total buy", "Sell date", "Sell price", "Total sell", "Dividends", "Taxes", "Net profit", "Position length (days)", "Yearly profit %"])
+        ["Closed", "Ticker", "Amount", "Currency", "Buy date", "Buy price", "Total buy", "Sell date", "Sell price", "Total sell", "Dividends", "Taxes", "Net profit", "Position length (days)", "Yearly profit %, XIRR"])
 
     with open(output_path + "/positions.csv", "w", newline='') as file:
         writer = csv.writer(file)
         writer.writerows(data)
+
+
+def calculate_xirr(position: Position, ex_rate: Decimal) -> Decimal:
+    flows = []
+    flows.append((position.open_date, -position.quantity * position.buy_price * ex_rate))
+    flows.append((position.close_date, position.quantity * position.sell_price * ex_rate))
+    for tax in position.taxes:
+        if tax.amount > Decimal("0"):
+            flows.append((tax.date, -tax.amount))
+    for dividend in position.dividends:
+        flows.append((dividend.date, dividend.amount))
+    result = xirr(flows)
+    if result is None:
+        breakpoint()
+    return Decimal(xirr(flows))

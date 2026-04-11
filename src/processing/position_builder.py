@@ -2,7 +2,7 @@ from datetime import datetime as Datetime
 from decimal import Decimal, ROUND_HALF_UP
 
 from model.action import Action
-from model.position import Position
+from model.position import Position, DatedAmount
 
 
 def build_positions(actions: list[Action], fx_rate_provider) -> list[Position]:
@@ -43,7 +43,7 @@ class PositionBuilder:
     def handle_dividend(self, action: Action):
         ex_rate = self.fx_rate_provider.get_rate(action.tax_currency, action.date)
         tax = action.tax * ex_rate
-        self._assign_income(action.symbol, action.result, tax, action.no_of_shares, action.reversed_assignment)
+        self._assign_income(action.symbol, action.result, action.date, tax, action.no_of_shares, action.reversed_assignment)
 
     def handle_lending_interest(self, action: Action):
         pass # TODO: consider spreading it to all open positions
@@ -70,8 +70,8 @@ class PositionBuilder:
             quantity=quantity,
             open_date=date,
             buy_price=price,
-            taxes=tax,
-            dividends=Decimal("0"),
+            taxes=[DatedAmount(date=date, amount=tax)],
+            dividends=[],
         ))
 
     def _close(self, symbol: str, currency: str, quantity: Decimal, date: Datetime, price: Decimal, tax: Decimal):
@@ -90,7 +90,7 @@ class PositionBuilder:
                 pos.closed = True
                 pos.close_date = date
                 pos.sell_price = price
-                pos.taxes += tax * pos.quantity / quantity
+                pos.taxes.append(DatedAmount(date=date, amount=tax * pos.quantity / quantity))
                 quantity_left -= pos.quantity
                 if quantity_left == 0:
                     break
@@ -98,21 +98,33 @@ class PositionBuilder:
     def _split_position(self, index: int, quantity: Decimal):
         pos = self.positions[index]
         new_quantity = pos.quantity - quantity
+        (taxes, new_taxes) = self._split_incosts(pos.taxes, quantity / pos.quantity)
+        (divs, new_div) = self._split_incosts(pos.dividends, quantity / pos.quantity)        
         new_pos = Position(
             symbol=pos.symbol,
             currency=pos.currency,        
             quantity=new_quantity,
             open_date=pos.open_date,
             buy_price=pos.buy_price,
-            taxes=pos.taxes * new_quantity / pos.quantity,
-            dividends=pos.dividends * new_quantity / pos.quantity,
+            taxes=new_taxes,
+            dividends=new_div,
         )
         pos.quantity -= new_quantity
-        pos.taxes -= new_pos.taxes
-        pos.dividends -= new_pos.dividends
+        pos.taxes = taxes
+        pos.dividends = divs
         self.positions.insert(index + 1, new_pos)
 
-    def _assign_income(self, symbol: str, amount: Decimal, tax: Decimal, no_of_shares: Decimal, reversed_assignment: bool):
+    def _split_incosts(self, incosts: list[DatedAmount], ratio: Decimal) -> tuple[list[DatedAmount], list[DatedAmount]]:
+        main_incosts = []
+        other_incosts = []
+        for incost in incosts:
+            main = DatedAmount(date=incost.date, amount=incost.amount * ratio)
+            other = DatedAmount(date=incost.date, amount=incost.amount - main.amount)
+            main_incosts.append(main)
+            other_incosts.append(other)
+        return (main_incosts, other_incosts)
+
+    def _assign_income(self, symbol: str, amount: Decimal, date: Datetime, tax: Decimal, no_of_shares: Decimal, reversed_assignment: bool):
         if no_of_shares == 0:
             no_of_shares = sum(p.quantity for p in self.positions if p.symbol == symbol and not p.closed)
 
@@ -121,8 +133,8 @@ class PositionBuilder:
         for pos in positions:
             if pos.symbol == symbol and not pos.closed:
                 pos_amount = min(amount * pos.quantity / no_of_shares, amount_left)
-                pos.dividends += pos_amount
-                pos.taxes += tax * pos_amount / amount
+                pos.dividends.append(DatedAmount(date=date, amount=pos_amount))
+                pos.taxes.append(DatedAmount(date=date, amount=tax * pos_amount / amount))
                 amount_left -= pos_amount
                 if amount_left == 0:
                     break
@@ -131,8 +143,8 @@ class PositionBuilder:
             for pos in reversed(self.positions):
                 if pos.symbol == symbol and pos.closed:
                     pos_amount = min(amount * pos.quantity / no_of_shares, amount_left)
-                    pos.dividends += pos_amount
-                    pos.taxes += tax * pos_amount / amount
+                    pos.dividends.append(DatedAmount(date=date, amount=pos_amount))
+                    pos.taxes.append(DatedAmount(date=date, amount=tax * pos_amount / amount))
                     amount_left -= pos_amount
                     if amount_left == 0:
                         break

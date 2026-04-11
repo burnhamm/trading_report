@@ -4,6 +4,12 @@ from decimal import Decimal
 
 
 @dataclass
+class DatedAmount:
+    date: Datetime
+    amount: Decimal
+
+
+@dataclass
 class Position:
     symbol: str
     currency: str
@@ -12,8 +18,8 @@ class Position:
     open_date: Datetime
     buy_price: Decimal
 
-    taxes: Decimal = Decimal("0")
-    dividends: Decimal = Decimal("0")
+    taxes: list[DatedAmount]
+    dividends: list[DatedAmount]
     
     closed: bool = False
     close_date: Datetime | None = None

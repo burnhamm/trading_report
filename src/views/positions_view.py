@@ -19,10 +19,10 @@ def generate_positions_view(positions: list[Position], fx_rate_provider, output_
             length_days = max(1, (pos.close_date - pos.open_date).days)
             duration = Decimal(length_days / 365.24)
             annualized = profit / duration / cost
-            xirr_result = calculate_xirr(pos, ex_rate)
+            exposure = duration * cost
             data.append(["CLOSED", pos.symbol, pos.quantity, pos.currency,  pos.open_date.date(), pos.buy_price, nm(cost), 
                          pos.close_date.date(), pos.sell_price, nm(proceeds), nm(dividends), nm(taxes), nm(profit), length_days, 
-                         nm(annualized), nm(xirr_result)])
+                         nm(annualized), nm(exposure)])
         else:
             data.append(["", pos.symbol, pos.quantity, pos.currency, pos.open_date.date(), pos.buy_price, nm(cost), "", "", "", 
                          nm(dividends), nm(taxes), "", "", "", ""])
@@ -30,7 +30,8 @@ def generate_positions_view(positions: list[Position], fx_rate_provider, output_
     data.sort(key=lambda r: (r[1], r[3], r[4]))
     data.sort(key=lambda r: r[0], reverse=True)
     data.insert(0, 
-        ["Closed", "Ticker", "Amount", "Currency", "Buy date", "Buy price", "Total buy", "Sell date", "Sell price", "Total sell", "Dividends", "Taxes", "Net profit", "Position length (days)", "Annual profit", "XIRR"])
+        ["Closed", "Ticker", "Amount", "Currency", "Buy date", "Buy price", "Total buy", "Sell date", "Sell price", "Total sell", 
+         "Dividends", "Taxes", "Net profit", "Position length (days)", "Annual profit", "Exposure"])
 
     with open(output_path + "/positions.csv", "w", newline='') as file:
         writer = csv.writer(file)

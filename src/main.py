@@ -15,6 +15,7 @@ from processing.incomes_n_costs_builder import build_income_cost
 from exchange.broker_fx_rates_builder import build_broker_fx_rates
 from views.cash_flow_view import generate_cash_flow_view
 from views.asset_view import generate_asset_view
+from views.asset_performance_closed_view import generate_asset_performance_closed_view
 from views.positions_view import generate_positions_view
 from views.fx_view import generate_fx_view
 from views.income_cost_view import generate_income_cost_view
@@ -57,6 +58,7 @@ def main():
         os.makedirs(views_path)
     generate_cash_flow_view(cash_flow, views_path)
     generate_asset_view(assets, views_path)
+    generate_asset_performance_closed_view(positions, fx_rate_provider, views_path)
     generate_positions_view(positions, fx_rate_provider, views_path)
     generate_fx_view(fx_positions, views_path)
     generate_income_cost_view(incosts, fx_rate_provider, views_path)

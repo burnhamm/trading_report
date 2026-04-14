@@ -24,7 +24,7 @@ def generate_asset_performance_closed_view(positions: list[Position], fx_rate_pr
         proceeds_ccy = Decimal("0")
         taxes = Decimal("0")
         dividends = Decimal("0")
-        asset_weight = Decimal("0")
+        asset_exposure = Decimal("0")
         annualized = Decimal("0")
 
         for pos in asset_positions:
@@ -51,19 +51,19 @@ def generate_asset_performance_closed_view(positions: list[Position], fx_rate_pr
             pos_duration = Decimal(max(1, (pos.close_date - pos.open_date).days) / 365.24)
             pos_annualized = pos_profit / pos_duration / pos_cost
 
-            pos_weight = pos_cost * pos_duration
-            asset_weight += pos_weight
+            pos_exposure = pos_cost * pos_duration
+            asset_exposure += pos_exposure
 
-            annualized += pos_weight * pos_annualized
+            annualized += pos_exposure * pos_annualized
 
         profit = proceeds - cost + dividends
         profit_ccy = proceeds_ccy - cost_ccy
 
-        annualized /= asset_weight
-        data.append([symbol, currency, nm(asset_weight), quantity, nm(cost_ccy), nm(proceeds_ccy), nm(cost), nm(proceeds), 
+        annualized /= asset_exposure
+        data.append([symbol, currency, nm(asset_exposure), quantity, nm(cost_ccy), nm(proceeds_ccy), nm(cost), nm(proceeds), 
                      nm(dividends), nm(taxes), nm(profit_ccy), nm(profit), nm(annualized)])
 
-    data.sort(key=lambda r: (r[2]), reverse=True)
+    data.sort(key=lambda r: (r[2], r[0], r[1]), reverse=True)
     #TODO: add FX impact
     #TODO: add exchange fee
     data.insert(0, ["Ticker", "Currency", f"Capital Exposure ({fx_rate_provider.base_currency} * years)", "Total Quantity Traded",

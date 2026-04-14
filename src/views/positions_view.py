@@ -8,21 +8,24 @@ from model.position import Position
 
 def generate_positions_view(positions: list[Position], fx_rate_provider, output_path: str):
     data = []
-    for p in positions:
-        ex_rate = fx_rate_provider.get_rate(p.currency, p.close_date if p.closed else p.open_date)
-        total_buy = p.quantity * p.buy_price * ex_rate
-        dividends = sum(i.amount for i in p.dividends)
-        taxes = sum(i.amount for i in p.taxes)
-        if p.closed:
-            total_sell = p.quantity * p.sell_price * ex_rate
-            total_profit = total_sell - total_buy + dividends
-            length_days = max(1, (p.close_date - p.open_date).days)
-            yearly_profit = total_profit / length_days * 365 if length_days > 0 else 0
-            yearly_profit_percent = yearly_profit / total_buy if total_buy > Decimal("0") else 0
-            xirr_result = calculate_xirr(p, ex_rate)
-            data.append(["CLOSED", p.symbol, p.quantity, p.currency,  p.open_date.date(), p.buy_price, nm(total_buy), p.close_date.date(), p.sell_price, nm(total_sell), nm(dividends), nm(taxes), nm(total_profit), length_days, nm(yearly_profit_percent), nm(xirr_result)])
+    for pos in positions:
+        ex_rate = fx_rate_provider.get_rate(pos.currency, pos.close_date if pos.closed else pos.open_date)
+        cost = pos.quantity * pos.buy_price * ex_rate
+        dividends = sum(i.amount for i in pos.dividends)
+        taxes = sum(i.amount for i in pos.taxes)
+        if pos.closed:
+            proceeds = pos.quantity * pos.sell_price * ex_rate
+            profit = proceeds - cost + dividends
+            length_days = max(1, (pos.close_date - pos.open_date).days)
+            duration = Decimal(length_days / 365.24)
+            annualized = profit / duration / cost
+            xirr_result = calculate_xirr(pos, ex_rate)
+            data.append(["CLOSED", pos.symbol, pos.quantity, pos.currency,  pos.open_date.date(), pos.buy_price, nm(cost), 
+                         pos.close_date.date(), pos.sell_price, nm(proceeds), nm(dividends), nm(taxes), nm(profit), length_days, 
+                         nm(annualized), nm(xirr_result)])
         else:
-            data.append(["", p.symbol, p.quantity, p.currency,  p.open_date.date(), p.buy_price, nm(total_buy), "", "", "", nm(dividends), nm(taxes), "", "", "", ""])
+            data.append(["", pos.symbol, pos.quantity, pos.currency, pos.open_date.date(), pos.buy_price, nm(cost), "", "", "", 
+                         nm(dividends), nm(taxes), "", "", "", ""])
 
     data.sort(key=lambda r: (r[1], r[3], r[4]))
     data.sort(key=lambda r: r[0], reverse=True)

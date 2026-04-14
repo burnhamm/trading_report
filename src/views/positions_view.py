@@ -15,7 +15,7 @@ def generate_positions_view(positions: list[Position], fx_rate_provider, output_
         taxes = sum(i.amount for i in p.taxes)
         if p.closed:
             total_sell = p.quantity * p.sell_price * ex_rate
-            total_profit = total_sell - total_buy + dividends - taxes
+            total_profit = total_sell - total_buy + dividends
             length_days = (p.close_date - p.open_date).days
             yearly_profit = total_profit / length_days * 365 if length_days > 0 else 0
             yearly_profit_percent = yearly_profit / total_buy if total_buy > Decimal("0") else 0

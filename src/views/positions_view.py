@@ -3,7 +3,7 @@ import csv
 from decimal import Decimal
 from pyxirr import xirr
 
-from decimal_utils import normalize_money as nm
+from decimal_utils import normalize_money as nm, normalize_ex_rate as ne
 from model.position import Position
 
 def generate_positions_view(positions: list[Position], fx_rate_provider, output_path: str):
@@ -25,26 +25,28 @@ def generate_positions_view(positions: list[Position], fx_rate_provider, output_
             annualized = profit / duration / cost
             exposure = duration * cost
             data.append(["CLOSED", pos.symbol, pos.currency, pos.quantity, nm(exposure),
-                         pos.open_date.date(), pos.buy_price, nm(cost), 
-                         pos.close_date.date(), pos.sell_price, nm(proceeds),
-                         nm(dividends), nm(fees), nm(taxes), nm(profit), duration_days,
-                         nm(annualized)])
+                         pos.open_date.date(), pos.buy_price, ne(buy_ex_rate), nm(cost), 
+                         pos.close_date.date(), pos.sell_price, ne(sell_ex_rate), nm(proceeds),
+                         nm(dividends), nm(fees), nm(taxes),
+                         duration_days, nm(profit), nm(fx_impact),
+                         nm(total_profit), nm(annualized)])
         else:
             data.append(["", pos.symbol, pos.currency, "",
                          pos.quantity, pos.open_date.date(), pos.buy_price, nm(cost), 
                          "", "", "",
-                         nm(dividends), nm(fees), nm(taxes), "", "",
-                         ""])
+                         nm(dividends), nm(fees), nm(taxes),
+                         "", "", "",
+                         "", ""])
 
     data.sort(key=lambda r: (r[1], r[2], r[5]))
     data.sort(key=lambda r: r[0], reverse=True)
     data.insert(0, 
         ["Closed", "Ticker", "Currency", "Quantity", f"Capital Exposure ({fx_rate_provider.base_currency} * years)", 
-         "Open date", f"Entry price ({fx_rate_provider.base_currency})", f"Cost Basis ({fx_rate_provider.base_currency})", 
-         "Close date", f"Exit price ({fx_rate_provider.base_currency})", f"Proceeds ({fx_rate_provider.base_currency})",
+         "Open date", f"Entry price ({fx_rate_provider.base_currency})", "Entry exchange rate", f"Cost Basis ({fx_rate_provider.base_currency})", 
+         "Close date", f"Exit price ({fx_rate_provider.base_currency})", "Exit exchange rate", f"Proceeds ({fx_rate_provider.base_currency})",
          f"Dividends ({fx_rate_provider.base_currency})", f"Exchange fees ({fx_rate_provider.base_currency})", f"Taxes ({fx_rate_provider.base_currency})",
-         f"Profit/Loss ({fx_rate_provider.base_currency})", "Holding period (days)",
-         "Annual Return"])
+         "Holding period (days)", f"Profit/Loss ({fx_rate_provider.base_currency})", f"FX impact ({fx_rate_provider.base_currency})",
+         f"Total Net Profit/Loss ({fx_rate_provider.base_currency})", "Annual Return"])
 
     with open(output_path + "/positions.csv", "w", newline='') as file:
         writer = csv.writer(file)

@@ -13,6 +13,7 @@ from processing.position_builder import build_positions
 from processing.fx_positions_builder import build_fx_positions
 from processing.incomes_n_costs_builder import build_income_cost
 from exchange.broker_fx_rates_builder import build_broker_fx_rates
+from views.actions_view import generate_actions_view
 from views.cash_flow_view import generate_cash_flow_view
 from views.asset_view import generate_asset_view
 from views.asset_performance_closed_view import generate_asset_performance_closed_view
@@ -56,6 +57,7 @@ def main():
     views_path = os.path.join(args.output_path, "views")
     if not os.path.exists(views_path):
         os.makedirs(views_path)
+    generate_actions_view(actions, views_path)
     generate_cash_flow_view(cash_flow, views_path)
     generate_asset_view(assets, views_path)
     generate_asset_performance_closed_view(positions, fx_rate_provider, views_path)

@@ -17,11 +17,14 @@ class Position:
 
     open_date: Datetime
     buy_price: Decimal
+    buy_ex_rate: Decimal
 
     taxes: list[DatedAmount]
     dividends: list[DatedAmount]
+    exchange_fees: list[DatedAmount]
     
     closed: bool = False
     close_date: Datetime | None = None
     sell_price: Decimal | None = None
+    sell_ex_rate: Decimal | None = None
     

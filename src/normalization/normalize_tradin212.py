@@ -84,21 +84,8 @@ def _map_buy(row: dict, base_currency: str) -> list[Action]:
         currency = 'GBP'
         price /= 100
         ex_rate /= 100
-
-    currency_amount = row["Total"]
-    if currency != row["Currency (Total)"]:
-        currency_amount = (row["No. of shares"] * price).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-        actions.append(ExchangeBuyAction(
-            date=row["Time"],
-            currency=currency,
-            quantity=currency_amount,
-            exchange_rate=(1 / ex_rate).quantize(Decimal("0.00000001"), rounding=ROUND_HALF_UP),
-            fee=row.get("Currency conversion fee", Decimal("0")), # in case of GBX <-> GBP conversion there is no fee
-            fee_currency=row.get("Currency (Currency conversion fee)", base_currency),
-            # in theory this should Total minus fee, but in practice we are interested here in the amount of money that was converted, so we take Total
-            # TODO: think if it wouldn't be more consistent to take Total minus fee and treat fee separately subtracting it from balance. Same would have to be applied to deposit
-            result=row["Total"],
-        ))
+    if currency == row["Currency (Total)"]:
+        ex_rate = None
 
     if row.get("Stamp duty reserve tax", Decimal("0")) != Decimal("0") and row.get("French transaction tax", Decimal("0")) != Decimal("0"):
         raise ValueError(f"Both stamp duty reserve tax and french transaction tax are present for the same buy action on {row['Time']} for ticker {row['Ticker']}. This case is not supported.")
@@ -121,16 +108,19 @@ def _map_buy(row: dict, base_currency: str) -> list[Action]:
         currency=currency,
         quantity=row["No. of shares"],
         price=price,
+        ex_rate=1 / ex_rate if ex_rate else None,
+        exchange_fee=row.get("Currency conversion fee", Decimal("0")),
         tax=tax,
         tax_currency=tax_currency,
-        result=currency_amount,
+        result=row["Total"],
+        result_currency=row["Currency (Total)"],
     ))
     return actions
 
 
 def _map_sell(row: dict, base_currency: str) -> list[Action]:    
     actions = []
-    currency_amount = row["Total"]
+
     currency: str = row['Currency (Price / share)']
     price: Decimal = row['Price / share']
     ex_rate: Decimal = row['Exchange rate']
@@ -138,10 +128,8 @@ def _map_sell(row: dict, base_currency: str) -> list[Action]:
         currency = 'GBP'
         price /= 100
         ex_rate /= 100
-
-    exchange_needed = currency != row["Currency (Total)"]
-    if exchange_needed:
-        currency_amount = (row["No. of shares"] * price).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    if currency == row["Currency (Total)"]:
+        ex_rate = None        
 
     actions.append(SellAction(
         date=row["Time"],
@@ -149,21 +137,11 @@ def _map_sell(row: dict, base_currency: str) -> list[Action]:
         currency=currency,
         quantity=row["No. of shares"],
         price=price,
-        result=currency_amount,
+        ex_rate=1 / ex_rate if ex_rate else None,
+        exchange_fee=row.get("Currency conversion fee", Decimal("0")),
+        result=row["Total"],
+        result_currency=row["Currency (Total)"],
     ))
-
-    if exchange_needed:
-        actions.append(ExchangeSellAction(
-            date=row["Time"],
-            currency=currency,
-            quantity=currency_amount,
-            exchange_rate=(1 / ex_rate).quantize(Decimal("0.00000001"), rounding=ROUND_HALF_UP), 
-            fee=row.get("Currency conversion fee", Decimal("0")), # in case of GBX <-> GBP conversion there is no fee
-            fee_currency=row.get("Currency (Currency conversion fee)", base_currency),           
-            # in theory this should Total minus fee, but in practice we are interested here in the amount of money that was converted, so we take Total
-            # TODO: think if it wouldn't be more consistent to take Total minus fee and treat fee separately subtracting it from balance. Same would have to be applied to deposit
-            result=row["Total"],
-        ))
 
     return actions
 

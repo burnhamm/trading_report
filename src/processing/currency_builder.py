@@ -29,11 +29,11 @@ class CurrencyBuilder:
         currency.amount -= action.amount
 
     def handle_buy(self, action: Action):
-        currency = self._get_currency(action.currency)
+        currency = self._get_currency(action.result_currency)
         currency.amount -= action.result
 
     def handle_sell(self, action: Action):
-        currency = self._get_currency(action.currency)
+        currency = self._get_currency(action.result_currency)
         currency.amount += action.result
 
     def handle_exchange_buy(self, action: Action):

@@ -24,16 +24,18 @@ class BrokerFxRatesBuilder:
         pass
 
     def handle_buy(self, action: Action):
-        pass
+        if action.ex_rate:
+            self._add_rate(action.currency, action.date, action.ex_rate)
 
     def handle_sell(self, action: Action):
-        pass
+        if action.ex_rate:
+            self._add_rate(action.currency, action.date, action.ex_rate)
 
     def handle_exchange_buy(self, action: Action):
-        self._add_rate(action.currency, action.date, action.exchange_rate)
+        pass
 
     def handle_exchange_sell(self, action: Action):
-        self._add_rate(action.currency, action.date, action.exchange_rate)
+        pass
 
     def handle_dividend(self, action: Action):
         pass

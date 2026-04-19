@@ -34,16 +34,18 @@ class CurrencyBuilder:
         pass
 
     def handle_buy(self, action: Action):
-        pass
+        if action.ex_rate:
+            self._open(action.currency, action.quantity * action.price, action.date, action.ex_rate, action.exchange_fee, self.base_currency)
 
     def handle_sell(self, action: Action):
-        pass
+        if action.ex_rate:
+            self._close(action.currency, action.quantity * action.price, action.date, action.ex_rate, action.exchange_fee, self.base_currency)
 
     def handle_exchange_buy(self, action: Action):
-        self._open(action.currency, action.quantity, action.date, action.exchange_rate, action.fee, action.fee_currency)
+        pass
 
     def handle_exchange_sell(self, action: Action):
-        self._close(action.currency, action.quantity, action.date, action.exchange_rate, action.fee, action.fee_currency)
+        pass
 
     def handle_dividend(self, action: Action):
         pass

@@ -36,7 +36,11 @@ class AssetAction(Action):
     quantity: Decimal
     price: Decimal
 
-    result: Decimal # in base currency
+    ex_rate: Decimal | None
+    exchange_fee: Decimal
+
+    result: Decimal
+    result_currency: str
 
 
 @dataclass
@@ -133,3 +137,13 @@ class SplitAction(Action):
 
     def apply(self, ctx):
         ctx.handle_split(self)
+
+@dataclass
+class ConversionAction(Action):
+    src_currency: str
+    src_amount: Decimal
+    dst_currency: str
+    dst_amount: Decimal
+
+    fee: Decimal
+    fee_currency: str # TODO: ensure it is used correclty in all reports and builders

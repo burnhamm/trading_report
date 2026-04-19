@@ -71,10 +71,11 @@ class SummaryReport:
 
     def handle_buy(self, action: Action):
         ex_rate = self.fx_rate_provider.get_rate(action.tax_currency, action.date)
+        self.exchange_fees += action.exchange_fee
         self.taxes += action.tax * ex_rate
 
     def handle_sell(self, action: Action):
-        pass
+        self.exchange_fees += action.exchange_fee
 
     def handle_exchange_buy(self, action: Action):
         self.exchange_fees += action.fee

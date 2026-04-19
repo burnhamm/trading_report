@@ -27,12 +27,12 @@ class PositionBuilder:
         pass
 
     def handle_buy(self, action: Action):
-        ex_rate = self.fx_rate_provider.get_rate(action.tax_currency, action.date)
-        tax = action.tax * ex_rate
-        self._open(action.symbol, action.currency, action.quantity, action.date, action.price, tax)
+        tax_ex_rate = self.fx_rate_provider.get_rate(action.tax_currency, action.date)
+        tax = action.tax * tax_ex_rate
+        self._open(action.symbol, action.currency, action.quantity, action.date, action.price, action.ex_rate, tax, action.exchange_fee)
 
     def handle_sell(self, action: Action):
-        self._close(action.symbol, action.currency, action.quantity, action.date, action.price, Decimal("0"))
+        self._close(action.symbol, action.currency, action.quantity, action.date, action.price, action.ex_rate, Decimal("0"), action.exchange_fee)
 
     def handle_exchange_buy(self, action: Action):
         pass
@@ -63,18 +63,20 @@ class PositionBuilder:
                 pos.quantity *= action.ratio
                 pos.buy_price /= action.ratio
 
-    def _open(self, symbol: str, currency: str, quantity: Decimal, date: Datetime, price: Decimal, tax: Decimal):
+    def _open(self, symbol: str, currency: str, quantity: Decimal, date: Datetime, price: Decimal, ex_rate: Decimal, tax: Decimal, ex_fee: Decimal):
         self.positions.append(Position(
             symbol=symbol,
             currency=currency,
             quantity=quantity,
             open_date=date,
             buy_price=price,
+            buy_ex_rate=ex_rate,
             taxes=[DatedAmount(date=date, amount=tax)],
             dividends=[],
+            exchange_fees=[DatedAmount(date=date, amount=ex_fee)],
         ))
 
-    def _close(self, symbol: str, currency: str, quantity: Decimal, date: Datetime, price: Decimal, tax: Decimal):
+    def _close(self, symbol: str, currency: str, quantity: Decimal, date: Datetime, price: Decimal, ex_rate: Decimal, tax: Decimal, ex_fee: Decimal):
         if quantity == 0:
             raise ValueError(f"zero quantity on sell: close_date: {date}, quantity: {quantity}")
         
@@ -90,7 +92,9 @@ class PositionBuilder:
                 pos.closed = True
                 pos.close_date = date
                 pos.sell_price = price
+                pos.sell_ex_rate = ex_rate
                 pos.taxes.append(DatedAmount(date=date, amount=tax * pos.quantity / quantity))
+                pos.exchange_fees.append(DatedAmount(date=date, amount=ex_fee))
                 quantity_left -= pos.quantity
                 if quantity_left == 0:
                     break
@@ -99,19 +103,23 @@ class PositionBuilder:
         pos = self.positions[index]
         new_quantity = pos.quantity - quantity
         (taxes, new_taxes) = self._split_incosts(pos.taxes, quantity / pos.quantity)
-        (divs, new_div) = self._split_incosts(pos.dividends, quantity / pos.quantity)        
+        (divs, new_divs) = self._split_incosts(pos.dividends, quantity / pos.quantity)
+        (fees, new_fees) = self._split_incosts(pos.exchange_fees, quantity / pos.quantity)
         new_pos = Position(
             symbol=pos.symbol,
             currency=pos.currency,        
             quantity=new_quantity,
             open_date=pos.open_date,
             buy_price=pos.buy_price,
+            buy_ex_rate=pos.buy_ex_rate,
             taxes=new_taxes,
-            dividends=new_div,
+            dividends=new_divs,
+            exchange_fees=new_fees,
         )
         pos.quantity -= new_quantity
         pos.taxes = taxes
         pos.dividends = divs
+        pos.exchange_fees = fees
         self.positions.insert(index + 1, new_pos)
 
     def _split_incosts(self, incosts: list[DatedAmount], ratio: Decimal) -> tuple[list[DatedAmount], list[DatedAmount]]:

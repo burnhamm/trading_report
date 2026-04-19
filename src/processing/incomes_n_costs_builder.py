@@ -32,6 +32,13 @@ class IncomeCostBuilder:
         pass
 
     def handle_buy(self, action: Action):
+        if action.exchange_fee > Decimal(0):
+            self.incomes_n_costs.append(Incost(
+                date=action.date,
+                type=IncostType.CONVERSION_FEE,
+                amount=action.exchange_fee,
+                currency=self.base_currency,
+            ))
         if action.tax > Decimal(0):
             self.incomes_n_costs.append(Incost(
                 date=action.date,
@@ -42,7 +49,13 @@ class IncomeCostBuilder:
             ))
 
     def handle_sell(self, action: Action):
-        pass
+        if action.exchange_fee > Decimal(0):
+            self.incomes_n_costs.append(Incost(
+                date=action.date,
+                type=IncostType.CONVERSION_FEE,
+                amount=action.exchange_fee,
+                currency=self.base_currency,
+            ))
 
     def handle_exchange_buy(self, action: Action):
         if action.fee > Decimal(0):

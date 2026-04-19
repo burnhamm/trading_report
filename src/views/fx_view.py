@@ -15,14 +15,11 @@ def generate_fx_view(positions: list[CurrencyPosition], output_path: str):
             length_days = (p.close_date - p.open_date).days
             yearly_profit = total_profit / length_days * 365 if length_days > 0 else 0
             yearly_profit_percent = yearly_profit / total_buy if total_buy > Decimal("0") else 0
-            # data.append([p.name, 'CLOSED', nd(p.amount), p.open_date.date(), nd(p.buy_price), nd(p.fees), nd(p.interest), p.close_date.date(), nd(p.sell_price)])
             data.append([p.name, 'CLOSED', nd(p.amount), p.open_date.date(), nd(p.buy_price), nd(total_buy), nd(p.fees), nd(p.interest), p.close_date.date(), nd(p.sell_price), nd(total_sell)])
         else:
-            # data.append([p.name, '', nd(p.amount), p.open_date.date(), nd(p.buy_price), nd(p.fees), nd(p.interest), '', '']) # add total buy here
             data.append([p.name, '', nd(p.amount), p.open_date.date(), nd(p.buy_price), nd(total_buy), nd(p.fees), nd(p.interest), '', '', '']) # add total buy here
 
     data.sort(key=lambda r: r[0])
-    # data.insert(0, ["Name", "Closed", "Amount", "Buy date", "Buy price", "Total fees", "Total dividends", "Sell date", "Sell price"]) # change to Total interest
     data.insert(0, ["Name", "Closed", "Amount", "Buy date", "Buy price", "Total buy", "Total fees", "Total dividends", "Sell date", "Sell price", "Total sell"]) # change to Total interest
 
     with open(output_path + "/fx.csv", "w", newline='') as file:

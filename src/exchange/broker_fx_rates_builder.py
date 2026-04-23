@@ -31,12 +31,6 @@ class BrokerFxRatesBuilder:
         if action.ex_rate:
             self._add_rate(action.currency, action.date, action.ex_rate)
 
-    def handle_exchange_buy(self, action: Action):
-        pass
-
-    def handle_exchange_sell(self, action: Action):
-        pass
-
     def handle_dividend(self, action: Action):
         pass
 
@@ -45,6 +39,13 @@ class BrokerFxRatesBuilder:
 
     def handle_interest_on_cash(self, action: Action):
         pass
+
+    def handle_conversion(self, action: Action):
+        if action.from_currency == self.base_currency:
+            self._add_rate(action.to_currency, action.date, action.from_amount / action.to_amount)
+        elif action.to_currency == self.base_currency:
+            breakpoint()
+            self._add_rate(action.from_currency, action.date, action.to_amount / action.from_amount)
 
     def handle_spending(self, action: Action):
         pass

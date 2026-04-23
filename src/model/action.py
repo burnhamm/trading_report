@@ -59,30 +59,6 @@ class SellAction(AssetAction):
 
 
 @dataclass
-class ExchangeAction(Action):
-    currency: str # destination currency for exchange, the source is always base currency
-    quantity: Decimal
-    exchange_rate: Decimal
-
-    fee: Decimal
-    fee_currency: str # TODO: ensure it is used correclty in all reports and builders
-
-    result: Decimal # in base currency
-
-
-@dataclass
-class ExchangeBuyAction(ExchangeAction):
-    def apply(self, ctx):
-        ctx.handle_exchange_buy(self)
-
-
-@dataclass
-class ExchangeSellAction(ExchangeAction):
-    def apply(self, ctx):
-        ctx.handle_exchange_sell(self)
-
-
-@dataclass
 class DividendAction(Action):
     symbol: str
     currency: str # TODO: determine if this can be not base currency
@@ -115,6 +91,20 @@ class InterestOnCashAction(Action):
 
 
 @dataclass
+class ConversionAction(Action):
+    from_currency: str
+    from_amount: Decimal
+    to_currency: str
+    to_amount: Decimal
+
+    fee: Decimal
+    fee_currency: str
+
+    def apply(self, ctx):
+        ctx.handle_conversion(self)
+
+
+@dataclass
 class SpendingAction(Action):
     result: Decimal # in base currency
 
@@ -137,13 +127,3 @@ class SplitAction(Action):
 
     def apply(self, ctx):
         ctx.handle_split(self)
-
-@dataclass
-class ConversionAction(Action):
-    src_currency: str
-    src_amount: Decimal
-    dst_currency: str
-    dst_amount: Decimal
-
-    fee: Decimal
-    fee_currency: str # TODO: ensure it is used correclty in all reports and builders

@@ -36,12 +36,6 @@ class AssetBuilder:
         asset.quantity -= action.quantity
         asset.closed_quantity += action.quantity
 
-    def handle_exchange_buy(self, action: Action):
-        pass
-
-    def handle_exchange_sell(self, action: Action):
-        pass
-
     def handle_dividend(self, action: Action):
         ex_rate = self.fx_rate_provider.get_rate(action.currency, action.date)
         tax = action.tax * ex_rate
@@ -52,6 +46,9 @@ class AssetBuilder:
         pass
 
     def handle_interest_on_cash(self, action: Action):
+        pass
+
+    def handle_conversion(self, action: Action):
         pass
 
     def handle_spending(self, action: Action):

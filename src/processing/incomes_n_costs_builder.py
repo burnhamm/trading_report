@@ -57,24 +57,6 @@ class IncomeCostBuilder:
                 currency=self.base_currency,
             ))
 
-    def handle_exchange_buy(self, action: Action):
-        if action.fee > Decimal(0):
-            self.incomes_n_costs.append(Incost(
-                date=action.date,
-                type=IncostType.CONVERSION_FEE,
-                amount=action.fee,
-                currency=action.fee_currency,
-            ))
-
-    def handle_exchange_sell(self, action: Action):
-        if action.fee > Decimal(0):
-            self.incomes_n_costs.append(Incost(
-                date=action.date,
-                type=IncostType.CONVERSION_FEE,
-                amount=action.fee,
-                currency=action.fee_currency,
-            ))
-
     def handle_dividend(self, action: Action):
         self.incomes_n_costs.append(Incost(
             date=action.date,
@@ -107,6 +89,15 @@ class IncomeCostBuilder:
             amount=action.amount,
             currency=action.currency
         ))
+
+    def handle_conversion(self, action: Action):
+        if action.fee > Decimal(0):
+            self.incomes_n_costs.append(Incost(
+                date=action.date,
+                type=IncostType.CONVERSION_FEE,
+                amount=action.fee,
+                currency=action.fee_currency,
+            ))
 
     def handle_spending(self, action: Action):
         pass

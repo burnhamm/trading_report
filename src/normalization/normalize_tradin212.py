@@ -183,34 +183,22 @@ def _map_interest_on_cash(row: dict) -> list[Action]:
 
 def _map_currency_conversion(row: dict, base_currency: str) -> list[Action]:
     # TODO: unlike other actions, for this one the fee is not accounted for in the Total, and should be subtracted explicitly
-    #+I think fee as closed position should be implemented for all actions. For now I will not create it though
+    #+I think the fee as closed position should be implemented for all actions. For now I will not create it though
     if row["Currency (Currency conversion from amount)"] != base_currency and \
        row["Currency (Currency conversion to amount)"] != base_currency:
         raise ValueError(f"Currency conversion between non-base currencies is not supported: {row['Currency (Currency conversion from amount)']} to {row['Currency (Currency conversion to amount)']}")
 
-    if row["Currency (Currency conversion from amount)"] == base_currency:
-        ex_rate = row["Currency conversion from amount"] / row["Currency conversion to amount"]
-        fee = Decimal(-row.get("Currency conversion fee", Decimal("0")))
-        return [ExchangeBuyAction(
+    fee = Decimal(-row.get("Currency conversion fee", Decimal("0")))
+    fee_currency = row.get("Currency (Currency conversion fee)", base_currency)
+
+    return [ConversionAction(
             date=row["Time"],
-            currency=row["Currency (Currency conversion to amount)"],
-            quantity=row["Currency conversion to amount"] - fee,
-            exchange_rate=(ex_rate).quantize(Decimal("0.00000001"), rounding=ROUND_HALF_UP),
+            from_currency=row["Currency (Currency conversion from amount)"],
+            to_currency=row["Currency (Currency conversion to amount)"],
+            from_amount=row["Currency conversion from amount"],
+            to_amount=row["Currency conversion to amount"] - fee,
             fee=fee,
-            fee_currency=row.get("Currency (Currency conversion fee)", base_currency),
-            result=row["Currency conversion from amount"],
-        )]
-    else:
-        ex_rate = row["Currency conversion to amount"] / row["Currency conversion from amount"]
-        # TODO: I haven't done exhange sell yet, so I don't know if I should subtract fee as in exhange buy. Perform this experiment
-        return [ExchangeSellAction(
-            date=row["Time"],
-            currency=row["Currency (Currency conversion from amount)"],
-            quantity=row["Currency conversion from amount"],
-            exchange_rate=(ex_rate).quantize(Decimal("0.00000001"), rounding=ROUND_HALF_UP),            
-            fee=-row.get("Currency conversion fee", Decimal("0")),
-            fee_currency=row.get("Currency (Currency conversion fee)", base_currency),
-            result=row["Currency conversion to amount"],
+            fee_currency=fee_currency,
         )]
 
 

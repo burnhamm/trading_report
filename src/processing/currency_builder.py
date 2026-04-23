@@ -36,21 +36,13 @@ class CurrencyBuilder:
         currency = self._get_currency(action.result_currency)
         currency.amount += action.result
 
-    def handle_exchange_buy(self, action: Action):
-        src_cur = self._get_currency(self.base_currency)
-        dst_cur = self._get_currency(action.currency)
-        src_cur.amount -= action.result
-        dst_cur.amount += action.quantity
+    def handle_conversion(self, action: Action):
+        from_cur = self._get_currency(action.from_currency)
+        to_cur = self._get_currency(action.to_currency)
+        from_cur.amount -= action.from_amount
+        to_cur.amount += action.to_amount
         ex_rate = self.fx_rate_provider.get_rate(action.fee_currency, action.date)
-        dst_cur.exchange_fees += action.fee * ex_rate
-
-    def handle_exchange_sell(self, action: Action):
-        src_cur = self._get_currency(self.base_currency)
-        dst_cur = self._get_currency(action.currency)
-        src_cur.amount += action.result
-        dst_cur.amount -= action.quantity
-        ex_rate = self.fx_rate_provider.get_rate(action.fee_currency, action.date)
-        src_cur.exchange_fees += action.fee * ex_rate
+        to_cur.exchange_fees += action.fee * ex_rate
 
     def handle_dividend(self, action: Action):
         currency = self._get_currency(self.base_currency)

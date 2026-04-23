@@ -38,12 +38,6 @@ class CashFlowBuilder:
     def handle_sell(self, action: Action):
         pass
 
-    def handle_exchange_buy(self, action: Action):
-        pass
-
-    def handle_exchange_sell(self, action: Action):
-        pass
-
     def handle_dividend(self, action: Action):
         pass
 
@@ -51,6 +45,9 @@ class CashFlowBuilder:
         pass
 
     def handle_interest_on_cash(self, action: Action):
+        pass
+
+    def handle_conversion(self, action: Action):
         pass
 
     def handle_spending(self, action: Action):

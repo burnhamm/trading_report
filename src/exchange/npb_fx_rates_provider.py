@@ -13,6 +13,9 @@ class NbpRatesProvider:
         self.rates: dict[str, dict[int, dict[Date, Decimal]]] = {}
 
     def get_rate(self, currency: str, date: Datetime) -> Decimal:
+        if currency == self.base_currency:
+            return Decimal("1")
+        
         rate = None
         date = date.date()
         while rate is None:

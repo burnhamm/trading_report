@@ -41,12 +41,6 @@ class CurrencyBuilder:
         if action.ex_rate:
             self._close(action.currency, action.quantity * action.price, action.date, action.ex_rate, action.exchange_fee, self.base_currency)
 
-    def handle_exchange_buy(self, action: Action):
-        pass
-
-    def handle_exchange_sell(self, action: Action):
-        pass
-
     def handle_dividend(self, action: Action):
         pass
 
@@ -57,6 +51,17 @@ class CurrencyBuilder:
         if action.currency != self.base_currency:
             ex_rate = self.fx_rate_provider.get_rate(action.currency, action.date)
             self._open(action.currency, action.amount, action.date, ex_rate, Decimal("0"), self.base_currency)
+
+    def handle_conversion(self, action: Action):
+        fee = action.fee * self.fx_rate_provider.get_rate(action.fee_currency, action.date)
+        if action.to_currency == self.base_currency:
+            ex_rate = self.fx_rate_provider.get_rate(action.to_currency, action.date)
+            self._open(action.to_currency, action.to_amount, action.date, ex_rate, fee, self.base_currency)
+            fee = 0
+
+        if action.from_currency != self.base_currency:
+            ex_rate = self.fx_rate_provider.get_rate(action.from_currency, action.date)
+            self._close(action.from_currency, action.from_amount, action.date, ex_rate, fee, self.base_currency)
 
     def handle_spending(self, action: Action):
         pass

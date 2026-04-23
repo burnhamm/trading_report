@@ -77,12 +77,6 @@ class SummaryReport:
     def handle_sell(self, action: Action):
         self.exchange_fees += action.exchange_fee
 
-    def handle_exchange_buy(self, action: Action):
-        self.exchange_fees += action.fee
-
-    def handle_exchange_sell(self, action: Action):
-        self.exchange_fees += action.fee
-
     def handle_dividend(self, action: Action):
         self.dividends += action.result
         ex_rate = self.fx_rate_provider.get_rate(action.tax_currency, action.date)
@@ -94,6 +88,9 @@ class SummaryReport:
     def handle_interest_on_cash(self, action: Action):
         ex_rate = self.fx_rate_provider.get_rate(action.currency, action.date)
         self.interest_on_cash += action.amount * ex_rate
+
+    def handle_conversion(self, action: Action):
+        self.exchange_fees += action.fee
 
     def handle_spending(self, action: Action):
         self.spending += action.result

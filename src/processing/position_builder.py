@@ -34,12 +34,6 @@ class PositionBuilder:
     def handle_sell(self, action: Action):
         self._close(action.symbol, action.currency, action.quantity, action.date, action.price, action.ex_rate, Decimal("0"), action.exchange_fee)
 
-    def handle_exchange_buy(self, action: Action):
-        pass
-
-    def handle_exchange_sell(self, action: Action):
-        pass
-
     def handle_dividend(self, action: Action):
         ex_rate = self.fx_rate_provider.get_rate(action.tax_currency, action.date)
         tax = action.tax * ex_rate
@@ -49,6 +43,9 @@ class PositionBuilder:
         pass # TODO: consider spreading it to all open positions
 
     def handle_interest_on_cash(self, action: Action):
+        pass
+
+    def handle_conversion(self, action: Action):
         pass
 
     def handle_spending(self, action: Action):

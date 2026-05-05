@@ -42,7 +42,7 @@ class IncomeCostBuilder:
         if action.tax > Decimal(0):
             self.incomes_n_costs.append(Incost(
                 date=action.date,
-                type=IncostType.TAX,
+                type=IncostType.TRANSACTION_TAX,
                 amount=action.tax,
                 currency=action.tax_currency,
                 symbol=action.symbol
@@ -68,7 +68,7 @@ class IncomeCostBuilder:
         if action.tax > Decimal(0):
             self.incomes_n_costs.append(Incost(
                 date=action.date,
-                type=IncostType.TAX,
+                type=IncostType.DIVIDEND_TAX,
                 amount=action.tax,
                 currency=action.tax_currency,
                 symbol=action.symbol

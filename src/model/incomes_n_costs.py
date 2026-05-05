@@ -10,7 +10,8 @@ class IncostType(Enum):
     CONVERSION_FEE = "conversion_fee"
     DIVIDEND = "dividend"
     INTEREST_LENDING = "interest_lending"
-    TAX = "tax"
+    DIVIDEND_TAX = "dividend_tax"
+    TRANSACTION_TAX = "transaction_tax"
 
 
 @dataclass
